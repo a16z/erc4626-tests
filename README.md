@@ -4,9 +4,9 @@ Foundry (dapptools-style) property-based tests for [ERC4626] standard conformanc
 
 [ERC4626]: <https://eips.ethereum.org/EIPS/eip-4626>
 
-You can read our post on "_[Executable ERC4626 Standard Properties]_."
+You can read our post on "_[Executable ERC4626 Standard Properties][post]_."
 
-[Executable ERC4626 Standard Properties]: TBA
+[post]: TBA
 
 ## Overview
 
@@ -59,7 +59,7 @@ $ forge install a16z/erc4626-tests
 
 [erc4626-tests]: <https://github.com/a16z/erc4626-tests>
 
-**Step 2**: Extend the abstract test contract [`ERC4626.test.sol`](ERC4626.test.sol) with your own custom vault setup method, for example:
+**Step 2**: Extend the abstract test contract [`ERC4626Test`](ERC4626.test.sol) with your own custom vault setup method, for example:
 
 ```solidity
 // SPDX-License-Identifier: AGPL-3.0
@@ -75,11 +75,20 @@ contract ERC4626StdTest is ERC4626Test {
     function setUp() public override {
         __underlying__ = address(new ERC20Mock("Mock ERC20", "MERC20", 18));
         __vault__ = address(new ERC4626Mock(ERC20Mock(__underlying__), "Mock ERC4626", "MERC4626"));
-        __delta__ = 0;  // the size rounding errors to be tolerated in checking test results
+        __delta__ = 0;
     }
 
 }
 ```
+
+Specifically, set the state variables as follows:
+- `__vault__`: the address of your ERC4626 vault.
+- `__underlying__`: the address of the underlying asset of your vault. Note that the default `setupVault()` and `setupYield()` methods of `ERC4626Test` assume that it implements `mint(address to, uint value)` and `burn(address from, uint value)`. You can override the setup methods with your own if such `mint()` and `burn()` are not implemented.
+- `__delta__`: the maximum approximation error size to be passed to [`assertApproxEqAbs()`]. It must be given as an absolute value (not a percentage) in the smallest unit (e.g., Wei or Satoshi). Note that all the tests are expected to pass with `__delta__ == 0` as long as the vault follows the [preferred rounding direction] as specified in the standard. If your vault doesn't follow the preferred rounding direction, you can set a reasonable size of rounding errors where the adversarial profit of exploiting such rounding errors stays sufficiently small compared to the gas cost. (You can read our [post] for more about the adversarial profit.) 
+
+[`assertApproxEqAbs()`]: <https://book.getfoundry.sh/reference/forge-std/assertApproxEqAbs>
+
+[preferred rounding direction]: <https://eips.ethereum.org/EIPS/eip-4626#security-considerations>
 
 **Step 3**: Run `forge test`
 
@@ -101,7 +110,6 @@ Below are examples of adding these property tests to existing ERC4626 vaults:
 [Yield Daddy ERC4626 wrappers]: <https://github.com/timeless-fi/yield-daddy>
 
 [^bug]: Our property tests indeed revealed a [bug](https://github.com/timeless-fi/yield-daddy/issues/7) in their eToken testing mock contract. The tests passed after it is [fixed](https://github.com/daejunpark/yield-daddy/commit/721cf4bd766805fd409455434aa5fd1a9b2df25c).
-
 
 ## Disclaimer
 
