@@ -99,10 +99,10 @@ $ forge test
 ## Examples
 
 Below are examples of adding these property tests to existing ERC4626 vaults:
-- [OpenZeppelin ERC4626] [[diff](https://github.com/daejunpark/openzeppelin-contracts/commit/c4a495447cb7345c29b25bda3b5365276bb2f29b)]
-- [Solmate ERC4626] [[diff](https://github.com/daejunpark/solmate/commit/36dc4adcf035b1e94ffe795d21a4c6e513ddcfbc)]
-- [Revenue Distribution Token] [[diff](https://github.com/daejunpark/revenue-distribution-token/commit/7ca627002ceb3af02c727fe5dda9a1170adf7a6d)]
-- [Yield Daddy ERC4626 wrappers] [[diff](https://github.com/daejunpark/yield-daddy/commit/15a76913f082cd98fdad47d1a5f7932115a59c36)][^bug]
+- [OpenZeppelin ERC4626] [[diff](https://github.com/daejunpark/openzeppelin-contracts/pull/1/files)]
+- [Solmate ERC4626] [[diff](https://github.com/daejunpark/solmate/pull/1/files)]
+- [Revenue Distribution Token] [[diff](https://github.com/daejunpark/revenue-distribution-token/pull/1/files)]
+- [Yield Daddy ERC4626 wrappers] [[diff](https://github.com/daejunpark/yield-daddy/pull/1/files)][^bug]
 
 [OpenZeppelin ERC4626]: <https://github.com/OpenZeppelin/openzeppelin-contracts/blob/a1948250ab8c441f6d327a65754cb20d2b1b4554/contracts/token/ERC20/extensions/ERC4626.sol>
 [Solmate ERC4626]: <https://github.com/transmissions11/solmate/blob/c2594bf4635ad773a8f4763e20b7e79582e41535/src/mixins/ERC4626.sol>
