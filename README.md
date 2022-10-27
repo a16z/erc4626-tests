@@ -4,7 +4,7 @@ Foundry (dapptools-style) property-based tests for [ERC4626] standard conformanc
 
 [ERC4626]: <https://eips.ethereum.org/EIPS/eip-4626>
 
-You can read our post on "_[Executable ERC4626 Standard Properties][post]_."
+You can read our post on "_[Generalized property tests for ERC4626 vaults][post]_."
 
 [post]: TBA
 
