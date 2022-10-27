@@ -338,7 +338,6 @@ abstract contract ERC4626Prop is Test {
         if (!(a >= b)) {
             uint dt = b - a;
             if (dt > maxDelta) {
-              //emit log_named_string   ("Error", err);
                 emit log                ("Error: a >=~ b not satisfied [uint]");
                 emit log_named_uint     ("   Value a", a);
                 emit log_named_uint     ("   Value b", b);
@@ -353,7 +352,6 @@ abstract contract ERC4626Prop is Test {
         if (!(a <= b)) {
             uint dt = a - b;
             if (dt > maxDelta) {
-              //emit log_named_string   ("Error", err);
                 emit log                ("Error: a <=~ b not satisfied [uint]");
                 emit log_named_uint     ("   Value a", a);
                 emit log_named_uint     ("   Value b", b);
