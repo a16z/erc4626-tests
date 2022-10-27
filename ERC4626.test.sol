@@ -36,11 +36,12 @@ abstract contract ERC4626Test is ERC4626Prop {
         }
 
         setupYield(init);
-
-        // totalAsset == sum(share) + yield
-        // totalShare == sum(share)
-
-        // user[i]: asset[i] asset, share[i] share
+        
+        // Expected state post-setup:
+        //
+        //      totalAsset == sum(share) + yield
+        //      totalShare == sum(share)
+        //      user[i]: { asset[i], share[i] }
     }
 
     function setupYield(Init memory init) public virtual {
