@@ -63,17 +63,17 @@ abstract contract ERC4626Prop is Test {
 
     // convertToShares
     // "MUST NOT show any variations depending on the caller."
-    function prop_convertToShares(address caller1, address caller2, uint amount) public {
-        vm.prank(caller1); uint res1 = vault_convertToShares(amount); // "MAY revert due to integer overflow caused by an unreasonably large input."
-        vm.prank(caller2); uint res2 = vault_convertToShares(amount); // "MAY revert due to integer overflow caused by an unreasonably large input."
+    function prop_convertToShares(address caller1, address caller2, uint assets) public {
+        vm.prank(caller1); uint res1 = vault_convertToShares(assets); // "MAY revert due to integer overflow caused by an unreasonably large input."
+        vm.prank(caller2); uint res2 = vault_convertToShares(assets); // "MAY revert due to integer overflow caused by an unreasonably large input."
         assertEq(res1, res2);
     }
 
     // convertToAssets
     // "MUST NOT show any variations depending on the caller."
-    function prop_convertToAssets(address caller1, address caller2, uint amount) public {
-        vm.prank(caller1); uint res1 = vault_convertToAssets(amount); // "MAY revert due to integer overflow caused by an unreasonably large input."
-        vm.prank(caller2); uint res2 = vault_convertToAssets(amount); // "MAY revert due to integer overflow caused by an unreasonably large input."
+    function prop_convertToAssets(address caller1, address caller2, uint shares) public {
+        vm.prank(caller1); uint res1 = vault_convertToAssets(shares); // "MAY revert due to integer overflow caused by an unreasonably large input."
+        vm.prank(caller2); uint res2 = vault_convertToAssets(shares); // "MAY revert due to integer overflow caused by an unreasonably large input."
         assertEq(res1, res2);
     }
 
@@ -169,9 +169,9 @@ abstract contract ERC4626Prop is Test {
     // shares that would be burned in a withdraw call in the same transaction.
     // I.e. withdraw should return the same or fewer shares as previewWithdraw
     // if called in the same transaction."
-    function prop_previewWithdraw(address caller, address receiver, address owner, address other, uint amount) public {
-        vm.prank(other); uint preview = vault_previewWithdraw(amount);
-        vm.prank(caller); uint actual = vault_withdraw(amount, receiver, owner);
+    function prop_previewWithdraw(address caller, address receiver, address owner, address other, uint assets) public {
+        vm.prank(other); uint preview = vault_previewWithdraw(assets);
+        vm.prank(caller); uint actual = vault_withdraw(assets, receiver, owner);
         assertApproxLeAbs(actual, preview, __delta__);
     }
 
@@ -209,9 +209,9 @@ abstract contract ERC4626Prop is Test {
     // would be withdrawn in a redeem call in the same transaction. I.e. redeem
     // should return the same or more assets as previewRedeem if called in the
     // same transaction."
-    function prop_previewRedeem(address caller, address receiver, address owner, address other, uint amount) public {
-        vm.prank(other); uint preview = vault_previewRedeem(amount);
-        vm.prank(caller); uint actual = vault_redeem(amount, receiver, owner);
+    function prop_previewRedeem(address caller, address receiver, address owner, address other, uint shares) public {
+        vm.prank(other); uint preview = vault_previewRedeem(shares);
+        vm.prank(caller); uint actual = vault_redeem(shares, receiver, owner);
         assertApproxGeAbs(actual, preview, __delta__);
     }
 

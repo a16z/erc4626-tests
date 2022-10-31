@@ -78,18 +78,18 @@ abstract contract ERC4626Test is ERC4626Prop {
     // convert
     //
 
-    function test_convertToShares(Init memory init, uint amount) public virtual {
+    function test_convertToShares(Init memory init, uint assets) public virtual {
         setupVault(init);
         address caller1 = init.user[0];
         address caller2 = init.user[1];
-        prop_convertToShares(caller1, caller2, amount);
+        prop_convertToShares(caller1, caller2, assets);
     }
 
-    function test_convertToAssets(Init memory init, uint amount) public virtual {
+    function test_convertToAssets(Init memory init, uint shares) public virtual {
         setupVault(init);
         address caller1 = init.user[0];
         address caller2 = init.user[1];
-        prop_convertToAssets(caller1, caller2, amount);
+        prop_convertToAssets(caller1, caller2, shares);
     }
 
     //
@@ -159,14 +159,14 @@ abstract contract ERC4626Test is ERC4626Prop {
         prop_maxWithdraw(caller, owner);
     }
 
-    function test_previewWithdraw(Init memory init, uint amount) public virtual {
+    function test_previewWithdraw(Init memory init, uint assets) public virtual {
         setupVault(init);
         address caller   = init.user[0];
         address receiver = init.user[1];
         address owner    = init.user[2];
         address other    = init.user[3];
         _approve(__vault__, owner, caller, type(uint).max);
-        prop_previewWithdraw(caller, receiver, owner, other, amount);
+        prop_previewWithdraw(caller, receiver, owner, other, assets);
     }
 
     function test_withdraw(Init memory init, uint assets, uint allowance) public virtual {
@@ -201,14 +201,14 @@ abstract contract ERC4626Test is ERC4626Prop {
         prop_maxRedeem(caller, owner);
     }
 
-    function test_previewRedeem(Init memory init, uint amount) public virtual {
+    function test_previewRedeem(Init memory init, uint shares) public virtual {
         setupVault(init);
         address caller   = init.user[0];
         address receiver = init.user[1];
         address owner    = init.user[2];
         address other    = init.user[3];
         _approve(__vault__, owner, caller, type(uint).max);
-        prop_previewRedeem(caller, receiver, owner, other, amount);
+        prop_previewRedeem(caller, receiver, owner, other, shares);
     }
 
     function test_redeem(Init memory init, uint shares, uint allowance) public virtual {
