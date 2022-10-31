@@ -323,6 +323,19 @@ abstract contract ERC4626Prop is Test {
         return _call_vault(abi.encodeWithSelector(IERC4626.convertToAssets.selector, shares));
     }
 
+    function vault_maxDeposit(address receiver) internal returns (uint) {
+        return _call_vault(abi.encodeWithSelector(IERC4626.maxDeposit.selector, receiver));
+    }
+    function vault_maxMint(address receiver) internal returns (uint) {
+        return _call_vault(abi.encodeWithSelector(IERC4626.maxMint.selector, receiver));
+    }
+    function vault_maxWithdraw(address owner) internal returns (uint) {
+        return _call_vault(abi.encodeWithSelector(IERC4626.maxWithdraw.selector, owner));
+    }
+    function vault_maxRedeem(address owner) internal returns (uint) {
+        return _call_vault(abi.encodeWithSelector(IERC4626.maxRedeem.selector, owner));
+    }
+
     function vault_previewDeposit(uint assets) internal returns (uint) {
         return _call_vault(abi.encodeWithSelector(IERC4626.previewDeposit.selector, assets));
     }
