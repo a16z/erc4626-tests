@@ -328,18 +328,22 @@ abstract contract ERC4626Test is ERC4626Prop {
     }
 
     function _max_deposit(address from) internal virtual returns (uint) {
+        if (__unlimited_amount__) return type(uint).max;
         return IERC20(__underlying__).balanceOf(from);
     }
 
     function _max_mint(address from) internal virtual returns (uint) {
+        if (__unlimited_amount__) return type(uint).max;
         return vault_convertToShares(IERC20(__underlying__).balanceOf(from));
     }
 
     function _max_withdraw(address from) internal virtual returns (uint) {
+        if (__unlimited_amount__) return type(uint).max;
         return vault_convertToAssets(IERC20(__vault__).balanceOf(from)); // may be different from maxWithdraw(from)
     }
 
     function _max_redeem(address from) internal virtual returns (uint) {
+        if (__unlimited_amount__) return type(uint).max;
         return IERC20(__vault__).balanceOf(from); // may be different from maxRedeem(from)
     }
 }

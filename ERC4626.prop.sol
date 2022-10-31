@@ -42,6 +42,7 @@ abstract contract ERC4626Prop is Test {
     address __vault__;
 
     bool __vault_may_be_empty__;
+    bool __unlimited_amount__;
 
     //
     // asset
