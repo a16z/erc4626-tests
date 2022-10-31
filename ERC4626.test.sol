@@ -108,6 +108,7 @@ abstract contract ERC4626Test is ERC4626Prop {
         address caller   = init.user[0];
         address receiver = init.user[1];
         address other    = init.user[2];
+        assets = bound(assets, 0, _max_deposit(caller));
         _approve(__underlying__, caller, __vault__, type(uint).max);
         prop_previewDeposit(caller, receiver, other, assets);
     }
@@ -116,6 +117,7 @@ abstract contract ERC4626Test is ERC4626Prop {
         setupVault(init);
         address caller   = init.user[0];
         address receiver = init.user[1];
+        assets = bound(assets, 0, _max_deposit(caller));
         _approve(__underlying__, caller, __vault__, allowance);
         prop_deposit(caller, receiver, assets);
     }
@@ -136,6 +138,7 @@ abstract contract ERC4626Test is ERC4626Prop {
         address caller   = init.user[0];
         address receiver = init.user[1];
         address other    = init.user[2];
+        shares = bound(shares, 0, _max_mint(caller));
         _approve(__underlying__, caller, __vault__, type(uint).max);
         prop_previewMint(caller, receiver, other, shares);
     }
@@ -144,6 +147,7 @@ abstract contract ERC4626Test is ERC4626Prop {
         setupVault(init);
         address caller   = init.user[0];
         address receiver = init.user[1];
+        shares = bound(shares, 0, _max_mint(caller));
         _approve(__underlying__, caller, __vault__, allowance);
         prop_mint(caller, receiver, shares);
     }
@@ -165,6 +169,7 @@ abstract contract ERC4626Test is ERC4626Prop {
         address receiver = init.user[1];
         address owner    = init.user[2];
         address other    = init.user[3];
+        assets = bound(assets, 0, _max_withdraw(owner));
         _approve(__vault__, owner, caller, type(uint).max);
         prop_previewWithdraw(caller, receiver, owner, other, assets);
     }
@@ -174,6 +179,7 @@ abstract contract ERC4626Test is ERC4626Prop {
         address caller   = init.user[0];
         address receiver = init.user[1];
         address owner    = init.user[2];
+        assets = bound(assets, 0, _max_withdraw(owner));
         _approve(__vault__, owner, caller, allowance);
         prop_withdraw(caller, receiver, owner, assets);
     }
@@ -183,6 +189,7 @@ abstract contract ERC4626Test is ERC4626Prop {
         address caller   = init.user[0];
         address receiver = init.user[1];
         address owner    = init.user[2];
+        assets = bound(assets, 0, _max_withdraw(owner));
         vm.assume(caller != owner);
         vm.assume(assets > 0);
         _approve(__vault__, owner, caller, 0);
@@ -207,6 +214,7 @@ abstract contract ERC4626Test is ERC4626Prop {
         address receiver = init.user[1];
         address owner    = init.user[2];
         address other    = init.user[3];
+        shares = bound(shares, 0, _max_redeem(owner));
         _approve(__vault__, owner, caller, type(uint).max);
         prop_previewRedeem(caller, receiver, owner, other, shares);
     }
@@ -216,6 +224,7 @@ abstract contract ERC4626Test is ERC4626Prop {
         address caller   = init.user[0];
         address receiver = init.user[1];
         address owner    = init.user[2];
+        shares = bound(shares, 0, _max_redeem(owner));
         _approve(__vault__, owner, caller, allowance);
         prop_redeem(caller, receiver, owner, shares);
     }
@@ -225,6 +234,7 @@ abstract contract ERC4626Test is ERC4626Prop {
         address caller   = init.user[0];
         address receiver = init.user[1];
         address owner    = init.user[2];
+        shares = bound(shares, 0, _max_redeem(owner));
         vm.assume(caller != owner);
         vm.assume(shares > 0);
         _approve(__vault__, owner, caller, 0);
@@ -238,6 +248,7 @@ abstract contract ERC4626Test is ERC4626Prop {
     function test_RT_deposit_redeem(Init memory init, uint assets) public virtual {
         setupVault(init);
         address caller = init.user[0];
+        assets = bound(assets, 0, _max_deposit(caller));
         _approve(__underlying__, caller, __vault__, type(uint).max);
         prop_RT_deposit_redeem(caller, assets);
     }
@@ -245,6 +256,7 @@ abstract contract ERC4626Test is ERC4626Prop {
     function test_RT_deposit_withdraw(Init memory init, uint assets) public virtual {
         setupVault(init);
         address caller = init.user[0];
+        assets = bound(assets, 0, _max_deposit(caller));
         _approve(__underlying__, caller, __vault__, type(uint).max);
         prop_RT_deposit_withdraw(caller, assets);
     }
@@ -252,6 +264,7 @@ abstract contract ERC4626Test is ERC4626Prop {
     function test_RT_redeem_deposit(Init memory init, uint shares) public virtual {
         setupVault(init);
         address caller = init.user[0];
+        shares = bound(shares, 0, _max_redeem(caller));
         _approve(__underlying__, caller, __vault__, type(uint).max);
         prop_RT_redeem_deposit(caller, shares);
     }
@@ -259,6 +272,7 @@ abstract contract ERC4626Test is ERC4626Prop {
     function test_RT_redeem_mint(Init memory init, uint shares) public virtual {
         setupVault(init);
         address caller = init.user[0];
+        shares = bound(shares, 0, _max_redeem(caller));
         _approve(__underlying__, caller, __vault__, type(uint).max);
         prop_RT_redeem_mint(caller, shares);
     }
@@ -266,6 +280,7 @@ abstract contract ERC4626Test is ERC4626Prop {
     function test_RT_mint_withdraw(Init memory init, uint shares) public virtual {
         setupVault(init);
         address caller = init.user[0];
+        shares = bound(shares, 0, _max_mint(caller));
         _approve(__underlying__, caller, __vault__, type(uint).max);
         prop_RT_mint_withdraw(caller, shares);
     }
@@ -273,6 +288,7 @@ abstract contract ERC4626Test is ERC4626Prop {
     function test_RT_mint_redeem(Init memory init, uint shares) public virtual {
         setupVault(init);
         address caller = init.user[0];
+        shares = bound(shares, 0, _max_mint(caller));
         _approve(__underlying__, caller, __vault__, type(uint).max);
         prop_RT_mint_redeem(caller, shares);
     }
@@ -280,6 +296,7 @@ abstract contract ERC4626Test is ERC4626Prop {
     function test_RT_withdraw_mint(Init memory init, uint assets) public virtual {
         setupVault(init);
         address caller = init.user[0];
+        assets = bound(assets, 0, _max_withdraw(caller));
         _approve(__underlying__, caller, __vault__, type(uint).max);
         prop_RT_withdraw_mint(caller, assets);
     }
@@ -287,6 +304,7 @@ abstract contract ERC4626Test is ERC4626Prop {
     function test_RT_withdraw_deposit(Init memory init, uint assets) public virtual {
         setupVault(init);
         address caller = init.user[0];
+        assets = bound(assets, 0, _max_withdraw(caller));
         _approve(__underlying__, caller, __vault__, type(uint).max);
         prop_RT_withdraw_deposit(caller, assets);
     }
@@ -307,5 +325,21 @@ abstract contract ERC4626Test is ERC4626Prop {
         (bool success, bytes memory retdata) = token.call(abi.encodeWithSelector(IERC20.approve.selector, spender, amount));
         vm.assume(success);
         if (retdata.length > 0) vm.assume(abi.decode(retdata, (bool)));
+    }
+
+    function _max_deposit(address from) internal virtual returns (uint) {
+        return IERC20(__underlying__).balanceOf(from);
+    }
+
+    function _max_mint(address from) internal virtual returns (uint) {
+        return vault_convertToShares(IERC20(__underlying__).balanceOf(from));
+    }
+
+    function _max_withdraw(address from) internal virtual returns (uint) {
+        return vault_convertToAssets(IERC20(__vault__).balanceOf(from)); // may be different from maxWithdraw(from)
+    }
+
+    function _max_redeem(address from) internal virtual returns (uint) {
+        return IERC20(__vault__).balanceOf(from); // may be different from maxRedeem(from)
     }
 }
