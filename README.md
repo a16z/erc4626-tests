@@ -69,20 +69,22 @@ import { ERC20Mock   } from "/path/to/mocks/ERC20Mock.sol";
 import { ERC4626Mock } from "/path/to/mocks/ERC4626Mock.sol";
 
 contract ERC4626StdTest is ERC4626Test {
-
     function setUp() public override {
-        __underlying__ = address(new ERC20Mock("Mock ERC20", "MERC20", 18));
-        __vault__ = address(new ERC4626Mock(ERC20Mock(__underlying__), "Mock ERC4626", "MERC4626"));
-        __delta__ = 0;
+        _underlying_ = address(new ERC20Mock("Mock ERC20", "MERC20", 18));
+        _vault_ = address(new ERC4626Mock(ERC20Mock(__underlying__), "Mock ERC4626", "MERC4626"));
+        _delta_ = 0;
+        _vaultMayBeEmpty = false;
+        _unlimitedAmount = false;
     }
-
 }
 ```
 
 Specifically, set the state variables as follows:
-- `__vault__`: the address of your ERC4626 vault.
-- `__underlying__`: the address of the underlying asset of your vault. Note that the default `setupVault()` and `setupYield()` methods of `ERC4626Test` assume that it implements `mint(address to, uint value)` and `burn(address from, uint value)`. You can override the setup methods with your own if such `mint()` and `burn()` are not implemented.
-- `__delta__`: the maximum approximation error size to be passed to [`assertApproxEqAbs()`]. It must be given as an absolute value (not a percentage) in the smallest unit (e.g., Wei or Satoshi). Note that all the tests are expected to pass with `__delta__ == 0` as long as your vault follows the [preferred rounding direction] as specified in the standard. If your vault doesn't follow the preferred rounding direction, you can set `__delta__` to a reasonable size of rounding errors where the adversarial profit of exploiting such rounding errors stays sufficiently small compared to the gas cost. (You can read our [post] for more about the adversarial profit.) 
+- `_vault_`: the address of your ERC4626 vault.
+- `_underlying_`: the address of the underlying asset of your vault. Note that the default `setupVault()` and `setupYield()` methods of `ERC4626Test` assume that it implements `mint(address to, uint value)` and `burn(address from, uint value)`. You can override the setup methods with your own if such `mint()` and `burn()` are not implemented.
+- `_delta_`: the maximum approximation error size to be passed to [`assertApproxEqAbs()`]. It must be given as an absolute value (not a percentage) in the smallest unit (e.g., Wei or Satoshi). Note that all the tests are expected to pass with `__delta__ == 0` as long as your vault follows the [preferred rounding direction] as specified in the standard. If your vault doesn't follow the preferred rounding direction, you can set `__delta__` to a reasonable size of rounding errors where the adversarial profit of exploiting such rounding errors stays sufficiently small compared to the gas cost. (You can read our [post] for more about the adversarial profit.)
+- `_vaultMayBeEmpty`: when set to false, fuzz inputs that empties the vault are ignored.
+- `_unlimitedAmount`: when set to false, fuzz inputs are restricted to the currently available amount from the caller. Limiting the amount can speed up fuzzing, but may miss some edge cases.
 
 [`assertApproxEqAbs()`]: <https://book.getfoundry.sh/reference/forge-std/assertApproxEqAbs>
 

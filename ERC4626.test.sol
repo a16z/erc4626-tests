@@ -27,34 +27,34 @@ abstract contract ERC4626Test is ERC4626Prop {
     //
     // init.user[i]'s assets == init.asset[i]
     // init.user[i]'s shares == init.share[i]
-    function setupVault(Init memory init) public virtual {
+    function setUpVault(Init memory init) public virtual {
         // setup initial shares and assets for individual users
         for (uint i = 0; i < N; i++) {
             address user = init.user[i];
             vm.assume(_isEOA(user));
             // shares
             uint shares = init.share[i];
-            try IMockERC20(__underlying__).mint(user, shares) {} catch { vm.assume(false); }
-            _approve(__underlying__, user, __vault__, shares);
-            vm.prank(user); try IERC4626(__vault__).deposit(shares, user) {} catch { vm.assume(false); }
+            try IMockERC20(_underlying_).mint(user, shares) {} catch { vm.assume(false); }
+            _approve(_underlying_, user, _vault_, shares);
+            vm.prank(user); try IERC4626(_vault_).deposit(shares, user) {} catch { vm.assume(false); }
             // assets
             uint assets = init.asset[i];
-            try IMockERC20(__underlying__).mint(user, assets) {} catch { vm.assume(false); }
+            try IMockERC20(_underlying_).mint(user, assets) {} catch { vm.assume(false); }
         }
 
         // setup initial yield for vault
-        setupYield(init);
+        setUpYield(init);
     }
 
     // setup initial yield
-    function setupYield(Init memory init) public virtual {
+    function setUpYield(Init memory init) public virtual {
         if (init.yield >= 0) { // gain
             uint gain = uint(init.yield);
-            try IMockERC20(__underlying__).mint(__vault__, gain) {} catch { vm.assume(false); } // this can be replaced by calling yield generating functions if provided by the vault
+            try IMockERC20(_underlying_).mint(_vault_, gain) {} catch { vm.assume(false); } // this can be replaced by calling yield generating functions if provided by the vault
         } else { // loss
             vm.assume(init.yield > type(int).min); // avoid overflow in conversion
             uint loss = uint(-1 * init.yield);
-            try IMockERC20(__underlying__).burn(__vault__, loss) {} catch { vm.assume(false); } // this can be replaced by calling yield generating functions if provided by the vault
+            try IMockERC20(_underlying_).burn(_vault_, loss) {} catch { vm.assume(false); } // this can be replaced by calling yield generating functions if provided by the vault
         }
     }
 
@@ -63,13 +63,13 @@ abstract contract ERC4626Test is ERC4626Prop {
     //
 
     function test_asset(Init memory init) public virtual {
-        setupVault(init);
+        setUpVault(init);
         address caller = init.user[0];
         prop_asset(caller);
     }
 
     function test_totalAssets(Init memory init) public virtual {
-        setupVault(init);
+        setUpVault(init);
         address caller = init.user[0];
         prop_totalAssets(caller);
     }
@@ -78,18 +78,18 @@ abstract contract ERC4626Test is ERC4626Prop {
     // convert
     //
 
-    function test_convertToShares(Init memory init, uint amount) public virtual {
-        setupVault(init);
+    function test_convertToShares(Init memory init, uint assets) public virtual {
+        setUpVault(init);
         address caller1 = init.user[0];
         address caller2 = init.user[1];
-        prop_convertToShares(caller1, caller2, amount);
+        prop_convertToShares(caller1, caller2, assets);
     }
 
-    function test_convertToAssets(Init memory init, uint amount) public virtual {
-        setupVault(init);
+    function test_convertToAssets(Init memory init, uint shares) public virtual {
+        setUpVault(init);
         address caller1 = init.user[0];
         address caller2 = init.user[1];
-        prop_convertToAssets(caller1, caller2, amount);
+        prop_convertToAssets(caller1, caller2, shares);
     }
 
     //
@@ -97,26 +97,28 @@ abstract contract ERC4626Test is ERC4626Prop {
     //
 
     function test_maxDeposit(Init memory init) public virtual {
-        setupVault(init);
+        setUpVault(init);
         address caller   = init.user[0];
         address receiver = init.user[1];
         prop_maxDeposit(caller, receiver);
     }
 
     function test_previewDeposit(Init memory init, uint assets) public virtual {
-        setupVault(init);
+        setUpVault(init);
         address caller   = init.user[0];
         address receiver = init.user[1];
         address other    = init.user[2];
-        _approve(__underlying__, caller, __vault__, type(uint).max);
+        assets = bound(assets, 0, _max_deposit(caller));
+        _approve(_underlying_, caller, _vault_, type(uint).max);
         prop_previewDeposit(caller, receiver, other, assets);
     }
 
     function test_deposit(Init memory init, uint assets, uint allowance) public virtual {
-        setupVault(init);
+        setUpVault(init);
         address caller   = init.user[0];
         address receiver = init.user[1];
-        _approve(__underlying__, caller, __vault__, allowance);
+        assets = bound(assets, 0, _max_deposit(caller));
+        _approve(_underlying_, caller, _vault_, allowance);
         prop_deposit(caller, receiver, assets);
     }
 
@@ -125,26 +127,28 @@ abstract contract ERC4626Test is ERC4626Prop {
     //
 
     function test_maxMint(Init memory init) public virtual {
-        setupVault(init);
+        setUpVault(init);
         address caller   = init.user[0];
         address receiver = init.user[1];
         prop_maxMint(caller, receiver);
     }
 
     function test_previewMint(Init memory init, uint shares) public virtual {
-        setupVault(init);
+        setUpVault(init);
         address caller   = init.user[0];
         address receiver = init.user[1];
         address other    = init.user[2];
-        _approve(__underlying__, caller, __vault__, type(uint).max);
+        shares = bound(shares, 0, _max_mint(caller));
+        _approve(_underlying_, caller, _vault_, type(uint).max);
         prop_previewMint(caller, receiver, other, shares);
     }
 
     function test_mint(Init memory init, uint shares, uint allowance) public virtual {
-        setupVault(init);
+        setUpVault(init);
         address caller   = init.user[0];
         address receiver = init.user[1];
-        _approve(__underlying__, caller, __vault__, allowance);
+        shares = bound(shares, 0, _max_mint(caller));
+        _approve(_underlying_, caller, _vault_, allowance);
         prop_mint(caller, receiver, shares);
     }
 
@@ -153,40 +157,43 @@ abstract contract ERC4626Test is ERC4626Prop {
     //
 
     function test_maxWithdraw(Init memory init) public virtual {
-        setupVault(init);
+        setUpVault(init);
         address caller = init.user[0];
         address owner  = init.user[1];
         prop_maxWithdraw(caller, owner);
     }
 
-    function test_previewWithdraw(Init memory init, uint amount) public virtual {
-        setupVault(init);
+    function test_previewWithdraw(Init memory init, uint assets) public virtual {
+        setUpVault(init);
         address caller   = init.user[0];
         address receiver = init.user[1];
         address owner    = init.user[2];
         address other    = init.user[3];
-        _approve(__vault__, owner, caller, type(uint).max);
-        prop_previewWithdraw(caller, receiver, owner, other, amount);
+        assets = bound(assets, 0, _max_withdraw(owner));
+        _approve(_vault_, owner, caller, type(uint).max);
+        prop_previewWithdraw(caller, receiver, owner, other, assets);
     }
 
     function test_withdraw(Init memory init, uint assets, uint allowance) public virtual {
-        setupVault(init);
+        setUpVault(init);
         address caller   = init.user[0];
         address receiver = init.user[1];
         address owner    = init.user[2];
-        _approve(__vault__, owner, caller, allowance);
+        assets = bound(assets, 0, _max_withdraw(owner));
+        _approve(_vault_, owner, caller, allowance);
         prop_withdraw(caller, receiver, owner, assets);
     }
 
     function testFail_withdraw(Init memory init, uint assets) public virtual {
-        setupVault(init);
+        setUpVault(init);
         address caller   = init.user[0];
         address receiver = init.user[1];
         address owner    = init.user[2];
+        assets = bound(assets, 0, _max_withdraw(owner));
         vm.assume(caller != owner);
         vm.assume(assets > 0);
-        _approve(__vault__, owner, caller, 0);
-        vm.prank(caller); uint shares = IERC4626(__vault__).withdraw(assets, receiver, owner);
+        _approve(_vault_, owner, caller, 0);
+        vm.prank(caller); uint shares = IERC4626(_vault_).withdraw(assets, receiver, owner);
         assertGt(shares, 0); // this assert is expected to fail
     }
 
@@ -195,40 +202,43 @@ abstract contract ERC4626Test is ERC4626Prop {
     //
 
     function test_maxRedeem(Init memory init) public virtual {
-        setupVault(init);
+        setUpVault(init);
         address caller = init.user[0];
         address owner  = init.user[1];
         prop_maxRedeem(caller, owner);
     }
 
-    function test_previewRedeem(Init memory init, uint amount) public virtual {
-        setupVault(init);
+    function test_previewRedeem(Init memory init, uint shares) public virtual {
+        setUpVault(init);
         address caller   = init.user[0];
         address receiver = init.user[1];
         address owner    = init.user[2];
         address other    = init.user[3];
-        _approve(__vault__, owner, caller, type(uint).max);
-        prop_previewRedeem(caller, receiver, owner, other, amount);
+        shares = bound(shares, 0, _max_redeem(owner));
+        _approve(_vault_, owner, caller, type(uint).max);
+        prop_previewRedeem(caller, receiver, owner, other, shares);
     }
 
     function test_redeem(Init memory init, uint shares, uint allowance) public virtual {
-        setupVault(init);
+        setUpVault(init);
         address caller   = init.user[0];
         address receiver = init.user[1];
         address owner    = init.user[2];
-        _approve(__vault__, owner, caller, allowance);
+        shares = bound(shares, 0, _max_redeem(owner));
+        _approve(_vault_, owner, caller, allowance);
         prop_redeem(caller, receiver, owner, shares);
     }
 
     function testFail_redeem(Init memory init, uint shares) public virtual {
-        setupVault(init);
+        setUpVault(init);
         address caller   = init.user[0];
         address receiver = init.user[1];
         address owner    = init.user[2];
+        shares = bound(shares, 0, _max_redeem(owner));
         vm.assume(caller != owner);
         vm.assume(shares > 0);
-        _approve(__vault__, owner, caller, 0);
-        vm.prank(caller); IERC4626(__vault__).redeem(shares, receiver, owner);
+        _approve(_vault_, owner, caller, 0);
+        vm.prank(caller); IERC4626(_vault_).redeem(shares, receiver, owner);
     }
 
     //
@@ -236,58 +246,66 @@ abstract contract ERC4626Test is ERC4626Prop {
     //
 
     function test_RT_deposit_redeem(Init memory init, uint assets) public virtual {
-        setupVault(init);
+        setUpVault(init);
         address caller = init.user[0];
-        _approve(__underlying__, caller, __vault__, type(uint).max);
+        assets = bound(assets, 0, _max_deposit(caller));
+        _approve(_underlying_, caller, _vault_, type(uint).max);
         prop_RT_deposit_redeem(caller, assets);
     }
 
     function test_RT_deposit_withdraw(Init memory init, uint assets) public virtual {
-        setupVault(init);
+        setUpVault(init);
         address caller = init.user[0];
-        _approve(__underlying__, caller, __vault__, type(uint).max);
+        assets = bound(assets, 0, _max_deposit(caller));
+        _approve(_underlying_, caller, _vault_, type(uint).max);
         prop_RT_deposit_withdraw(caller, assets);
     }
 
     function test_RT_redeem_deposit(Init memory init, uint shares) public virtual {
-        setupVault(init);
+        setUpVault(init);
         address caller = init.user[0];
-        _approve(__underlying__, caller, __vault__, type(uint).max);
+        shares = bound(shares, 0, _max_redeem(caller));
+        _approve(_underlying_, caller, _vault_, type(uint).max);
         prop_RT_redeem_deposit(caller, shares);
     }
 
     function test_RT_redeem_mint(Init memory init, uint shares) public virtual {
-        setupVault(init);
+        setUpVault(init);
         address caller = init.user[0];
-        _approve(__underlying__, caller, __vault__, type(uint).max);
+        shares = bound(shares, 0, _max_redeem(caller));
+        _approve(_underlying_, caller, _vault_, type(uint).max);
         prop_RT_redeem_mint(caller, shares);
     }
 
     function test_RT_mint_withdraw(Init memory init, uint shares) public virtual {
-        setupVault(init);
+        setUpVault(init);
         address caller = init.user[0];
-        _approve(__underlying__, caller, __vault__, type(uint).max);
+        shares = bound(shares, 0, _max_mint(caller));
+        _approve(_underlying_, caller, _vault_, type(uint).max);
         prop_RT_mint_withdraw(caller, shares);
     }
 
     function test_RT_mint_redeem(Init memory init, uint shares) public virtual {
-        setupVault(init);
+        setUpVault(init);
         address caller = init.user[0];
-        _approve(__underlying__, caller, __vault__, type(uint).max);
+        shares = bound(shares, 0, _max_mint(caller));
+        _approve(_underlying_, caller, _vault_, type(uint).max);
         prop_RT_mint_redeem(caller, shares);
     }
 
     function test_RT_withdraw_mint(Init memory init, uint assets) public virtual {
-        setupVault(init);
+        setUpVault(init);
         address caller = init.user[0];
-        _approve(__underlying__, caller, __vault__, type(uint).max);
+        assets = bound(assets, 0, _max_withdraw(caller));
+        _approve(_underlying_, caller, _vault_, type(uint).max);
         prop_RT_withdraw_mint(caller, assets);
     }
 
     function test_RT_withdraw_deposit(Init memory init, uint assets) public virtual {
-        setupVault(init);
+        setUpVault(init);
         address caller = init.user[0];
-        _approve(__underlying__, caller, __vault__, type(uint).max);
+        assets = bound(assets, 0, _max_withdraw(caller));
+        _approve(_underlying_, caller, _vault_, type(uint).max);
         prop_RT_withdraw_deposit(caller, assets);
     }
 
@@ -307,5 +325,25 @@ abstract contract ERC4626Test is ERC4626Prop {
         (bool success, bytes memory retdata) = token.call(abi.encodeWithSelector(IERC20.approve.selector, spender, amount));
         vm.assume(success);
         if (retdata.length > 0) vm.assume(abi.decode(retdata, (bool)));
+    }
+
+    function _max_deposit(address from) internal virtual returns (uint) {
+        if (_unlimitedAmount) return type(uint).max;
+        return IERC20(_underlying_).balanceOf(from);
+    }
+
+    function _max_mint(address from) internal virtual returns (uint) {
+        if (_unlimitedAmount) return type(uint).max;
+        return vault_convertToShares(IERC20(_underlying_).balanceOf(from));
+    }
+
+    function _max_withdraw(address from) internal virtual returns (uint) {
+        if (_unlimitedAmount) return type(uint).max;
+        return vault_convertToAssets(IERC20(_vault_).balanceOf(from)); // may be different from maxWithdraw(from)
+    }
+
+    function _max_redeem(address from) internal virtual returns (uint) {
+        if (_unlimitedAmount) return type(uint).max;
+        return IERC20(_vault_).balanceOf(from); // may be different from maxRedeem(from)
     }
 }
