@@ -22,7 +22,7 @@ abstract contract ERC4626Test is ERC4626Prop {
 
     // setup initial vault state as follows:
     //
-    // totalAssets == sum(init.share) + init.yield
+    // totalAssets == sum(init.asset) + init.yield
     // totalShares == sum(init.share)
     //
     // init.user[i]'s assets == init.asset[i]
