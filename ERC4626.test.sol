@@ -184,7 +184,7 @@ abstract contract ERC4626Test is ERC4626Prop {
         prop_withdraw(caller, receiver, owner, assets);
     }
 
-    function testFail_withdraw(Init memory init, uint assets) public virtual {
+    function test_withdraw_zero_allowance(Init memory init, uint assets) public virtual {
         setUpVault(init);
         address caller   = init.user[0];
         address receiver = init.user[1];
@@ -193,8 +193,8 @@ abstract contract ERC4626Test is ERC4626Prop {
         vm.assume(caller != owner);
         vm.assume(assets > 0);
         _approve(_vault_, owner, caller, 0);
+        expectRevert(); // We do not provide a specific revert reason, as it may vary depending on the implementation.
         vm.prank(caller); uint shares = IERC4626(_vault_).withdraw(assets, receiver, owner);
-        assertGt(shares, 0); // this assert is expected to fail
     }
 
     //
@@ -229,7 +229,7 @@ abstract contract ERC4626Test is ERC4626Prop {
         prop_redeem(caller, receiver, owner, shares);
     }
 
-    function testFail_redeem(Init memory init, uint shares) public virtual {
+    function test_redeem_zero_allowance(Init memory init, uint shares) public virtual {
         setUpVault(init);
         address caller   = init.user[0];
         address receiver = init.user[1];
@@ -238,6 +238,7 @@ abstract contract ERC4626Test is ERC4626Prop {
         vm.assume(caller != owner);
         vm.assume(shares > 0);
         _approve(_vault_, owner, caller, 0);
+        expectRevert(); // We do not provide a specific revert reason, as it may vary depending on the implementation.
         vm.prank(caller); IERC4626(_vault_).redeem(shares, receiver, owner);
     }
 
