@@ -195,7 +195,7 @@ abstract contract ERC4626Test is ERC4626Prop {
         _approve(_vault_, owner, caller, 0);
         vm.prank(caller);
         expectRevert(); // We do not provide a specific revert reason, as it may vary depending on the implementation.
-        uint shares = IERC4626(_vault_).withdraw(assets, receiver, owner);
+        IERC4626(_vault_).withdraw(assets, receiver, owner);
     }
 
     //
