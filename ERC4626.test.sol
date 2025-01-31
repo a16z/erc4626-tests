@@ -193,8 +193,9 @@ abstract contract ERC4626Test is ERC4626Prop {
         vm.assume(caller != owner);
         vm.assume(assets > 0);
         _approve(_vault_, owner, caller, 0);
+        vm.prank(caller);
         expectRevert(); // We do not provide a specific revert reason, as it may vary depending on the implementation.
-        vm.prank(caller); uint shares = IERC4626(_vault_).withdraw(assets, receiver, owner);
+        uint shares = IERC4626(_vault_).withdraw(assets, receiver, owner);
     }
 
     //
@@ -238,8 +239,9 @@ abstract contract ERC4626Test is ERC4626Prop {
         vm.assume(caller != owner);
         vm.assume(shares > 0);
         _approve(_vault_, owner, caller, 0);
+        vm.prank(caller);
         expectRevert(); // We do not provide a specific revert reason, as it may vary depending on the implementation.
-        vm.prank(caller); IERC4626(_vault_).redeem(shares, receiver, owner);
+        IERC4626(_vault_).redeem(shares, receiver, owner);
     }
 
     //
