@@ -34,9 +34,15 @@ abstract contract ERC4626Test is ERC4626Prop {
             vm.assume(_isEOA(user));
             // shares
             uint shares = init.share[i];
-            try IMockERC20(_underlying_).mint(user, shares) {} catch { vm.assume(false); }
-            _approve(_underlying_, user, _vault_, shares);
-            vm.prank(user); try IERC4626(_vault_).deposit(shares, user) {} catch { vm.assume(false); }
+            uint amount;
+            try IERC4626(_vault_).previewMint(shares) returns (uint256 result) {
+                amount = result;
+            } catch {
+                vm.assume(false);
+            }
+            try IMockERC20(_underlying_).mint(user, amount) {} catch { vm.assume(false); }
+            _approve(_underlying_, user, _vault_, amount);
+            vm.prank(user); try IERC4626(_vault_).mint(shares, user) {} catch { vm.assume(false); }
             // assets
             uint assets = init.asset[i];
             try IMockERC20(_underlying_).mint(user, assets) {} catch { vm.assume(false); }
