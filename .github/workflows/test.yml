@@ -1,0 +1,67 @@
+name: Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        project:
+          - repo: "OpenZeppelin/openzeppelin-contracts"
+            dir: "openzeppelin-contracts"
+            submodule: "lib/erc4626-tests"
+            cmd: "forge test --mc ERC4626StdTest"
+          - repo: "morpho-org/metamorpho"
+            dir: "metamorpho"
+            submodule: "lib/erc4626-tests"
+            cmd: "forge test --mc ERC4626ComplianceTest"
+          - repo: "yearn/tokenized-strategy"
+            dir: "tokenized-strategy"
+            submodule: "lib/erc4626-tests"
+            cmd: "forge test --mc ERC4626StdTest"
+          - repo: "pcaversaccio/snekmate"
+            dir: "snekmate"
+            submodule: "lib/erc4626-tests"
+            cmd: "forge test --mc ERC4626VaultTest"
+          - repo: "aave-dao/aave-umbrella"
+            dir: "aave-umbrella"
+            submodule: "lib/erc4626-tests"
+            cmd: "forge test --mc ERC4626StdTest"
+
+    steps:
+      - name: Checkout current repository
+        uses: actions/checkout@v4
+        with:
+          path: erc4626-tests
+
+      - name: Checkout external project
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ matrix.project.repo }}
+          path: ${{ matrix.project.dir }}
+          submodules: recursive
+
+      - name: Replace submodule with current repository
+        working-directory: ${{ matrix.project.dir }}
+        run: |
+          rm -rf ${{ matrix.project.submodule }}
+          cp -r ${{ github.workspace }}/erc4626-tests ${{ matrix.project.submodule }}
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
+      - name: Install Vyper
+        run: pip install git+https://github.com/vyperlang/vyper.git@master
+
+      - name: Run tests
+        working-directory: ${{ matrix.project.dir }}
+        run: |
+          ${{ matrix.project.cmd }}
