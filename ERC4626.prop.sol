@@ -47,6 +47,7 @@ abstract contract ERC4626Prop is Test {
 
     bool internal _vaultMayBeEmpty;
     bool internal _unlimitedAmount;
+    bool internal _skipRoundTripShares;
 
     //
     // asset
@@ -246,7 +247,7 @@ abstract contract ERC4626Prop is Test {
     //
 
     // redeem(deposit(a)) <= a
-    function prop_RT_deposit_redeem(address caller, uint assets) public {
+    function prop_RT_deposit_redeem(address caller, uint assets) public checkNoFreeProfit(caller) {
         if (!_vaultMayBeEmpty) vm.assume(IERC20(_vault_).totalSupply() > 0);
         vm.prank(caller); uint shares = vault_deposit(assets, caller);
         vm.prank(caller); uint assets2 = vault_redeem(shares, caller, caller);
@@ -256,25 +257,25 @@ abstract contract ERC4626Prop is Test {
     // s = deposit(a)
     // s' = withdraw(a)
     // s' >= s
-    function prop_RT_deposit_withdraw(address caller, uint assets) public {
+    function prop_RT_deposit_withdraw(address caller, uint assets) public checkNoFreeProfit(caller) {
         if (!_vaultMayBeEmpty) vm.assume(IERC20(_vault_).totalSupply() > 0);
         vm.prank(caller); uint shares1 = vault_deposit(assets, caller);
         vm.prank(caller); uint shares2 = vault_withdraw(assets, caller, caller);
-        assertApproxGeAbs(shares2, shares1, _delta_);
+        if (!_skipRoundTripShares) assertApproxGeAbs(shares2, shares1, _delta_);
     }
 
     // deposit(redeem(s)) <= s
-    function prop_RT_redeem_deposit(address caller, uint shares) public {
+    function prop_RT_redeem_deposit(address caller, uint shares) public checkNoFreeProfit(caller) {
         vm.prank(caller); uint assets = vault_redeem(shares, caller, caller);
         if (!_vaultMayBeEmpty) vm.assume(IERC20(_vault_).totalSupply() > 0);
         vm.prank(caller); uint shares2 = vault_deposit(assets, caller);
-        assertApproxLeAbs(shares2, shares, _delta_);
+        if (!_skipRoundTripShares) assertApproxLeAbs(shares2, shares, _delta_);
     }
 
     // a = redeem(s)
     // a' = mint(s)
     // a' >= a
-    function prop_RT_redeem_mint(address caller, uint shares) public {
+    function prop_RT_redeem_mint(address caller, uint shares) public checkNoFreeProfit(caller) {
         vm.prank(caller); uint assets1 = vault_redeem(shares, caller, caller);
         if (!_vaultMayBeEmpty) vm.assume(IERC20(_vault_).totalSupply() > 0);
         vm.prank(caller); uint assets2 = vault_mint(shares, caller);
@@ -282,17 +283,17 @@ abstract contract ERC4626Prop is Test {
     }
 
     // withdraw(mint(s)) >= s
-    function prop_RT_mint_withdraw(address caller, uint shares) public {
+    function prop_RT_mint_withdraw(address caller, uint shares) public checkNoFreeProfit(caller) {
         if (!_vaultMayBeEmpty) vm.assume(IERC20(_vault_).totalSupply() > 0);
         vm.prank(caller); uint assets = vault_mint(shares, caller);
         vm.prank(caller); uint shares2 = vault_withdraw(assets, caller, caller);
-        assertApproxGeAbs(shares2, shares, _delta_);
+        if (!_skipRoundTripShares) assertApproxGeAbs(shares2, shares, _delta_);
     }
 
     // a = mint(s)
     // a' = redeem(s)
     // a' <= a
-    function prop_RT_mint_redeem(address caller, uint shares) public {
+    function prop_RT_mint_redeem(address caller, uint shares) public checkNoFreeProfit(caller) {
         if (!_vaultMayBeEmpty) vm.assume(IERC20(_vault_).totalSupply() > 0);
         vm.prank(caller); uint assets1 = vault_mint(shares, caller);
         vm.prank(caller); uint assets2 = vault_redeem(shares, caller, caller);
@@ -300,7 +301,7 @@ abstract contract ERC4626Prop is Test {
     }
 
     // mint(withdraw(a)) >= a
-    function prop_RT_withdraw_mint(address caller, uint assets) public {
+    function prop_RT_withdraw_mint(address caller, uint assets) public checkNoFreeProfit(caller) {
         vm.prank(caller); uint shares = vault_withdraw(assets, caller, caller);
         if (!_vaultMayBeEmpty) vm.assume(IERC20(_vault_).totalSupply() > 0);
         vm.prank(caller); uint assets2 = vault_mint(shares, caller);
@@ -310,11 +311,22 @@ abstract contract ERC4626Prop is Test {
     // s = withdraw(a)
     // s' = deposit(a)
     // s' <= s
-    function prop_RT_withdraw_deposit(address caller, uint assets) public {
+    function prop_RT_withdraw_deposit(address caller, uint assets) public checkNoFreeProfit(caller) {
         vm.prank(caller); uint shares1 = vault_withdraw(assets, caller, caller);
         if (!_vaultMayBeEmpty) vm.assume(IERC20(_vault_).totalSupply() > 0);
         vm.prank(caller); uint shares2 = vault_deposit(assets, caller);
-        assertApproxLeAbs(shares2, shares1, _delta_);
+        if (!_skipRoundTripShares) assertApproxLeAbs(shares2, shares1, _delta_);
+    }
+
+    modifier checkNoFreeProfit(address caller) {
+        uint256 assetsBefore = _getTotalAssets(caller);
+        _;
+        uint256 assetsAfter = _getTotalAssets(caller);
+        assertApproxLeAbs(assetsAfter, assetsBefore, _delta_);
+    }
+
+    function _getTotalAssets(address account) internal returns (uint256) {
+        return vault_convertToAssets(IERC20(_vault_).balanceOf(account)) + IERC20(_underlying_).balanceOf(account);
     }
 
     //
