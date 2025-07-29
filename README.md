@@ -86,7 +86,7 @@ Specifically, set the state variables as follows:
 - `_delta_`: the maximum approximation error size to be passed to [`assertApproxEqAbs()`]. It must be given as an absolute value (not a percentage) in the smallest unit (e.g., Wei or Satoshi). Note that all the tests are expected to pass with `__delta__ == 0` as long as your vault follows the [preferred rounding direction] as specified in the standard. If your vault doesn't follow the preferred rounding direction, you can set `__delta__` to a reasonable size of rounding errors where the adversarial profit of exploiting such rounding errors stays sufficiently small compared to the gas cost. (You can read our [post] for more about the adversarial profit.)
 - `_vaultMayBeEmpty`: when set to false, fuzz inputs that empties the vault are ignored.
 - `_unlimitedAmount`: when set to false, fuzz inputs are restricted to the currently available amount from the caller. Limiting the amount can speed up fuzzing, but may miss some edge cases.
-- `_skipRoundTripShares`: when set to true, shares inequality assertions in round trip property tests are skipped. This is useful for testing vaults where shares comparison may not yield expected results due to implementation-specific behavior (see issue #13 for examples).
+- `_skipRoundTripShares`: when set to true, shares inequality assertions in round trip properties are skipped. This is useful for testing vaults where shares comparison may not yield expected results due to implementation-specific behavior (see issue [#13](https://github.com/a16z/erc4626-tests/issues/13) for examples).
 
 [`assertApproxEqAbs()`]: <https://book.getfoundry.sh/reference/forge-std/assertApproxEqAbs>
 
