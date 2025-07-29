@@ -98,18 +98,14 @@ $ forge test
 
 ## Examples
 
-Below are examples of adding these property tests to existing ERC4626 vaults:
-- [OpenZeppelin ERC4626] [[diff](https://github.com/daejunpark/openzeppelin-contracts/pull/1/files)]
-- [Solmate ERC4626] [[diff](https://github.com/daejunpark/solmate/pull/1/files)]
-- [Revenue Distribution Token] [[diff](https://github.com/daejunpark/revenue-distribution-token/pull/1/files)]
-- [Yield Daddy ERC4626 wrappers] [[diff](https://github.com/daejunpark/yield-daddy/pull/1/files)][^bug]
+Here are some examples of these property tests in use:
+- [OpenZeppelin ERC4626 Test](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/da1dfe6c96f6f07f174a98428322b1386e12b024/test/token/ERC20/extensions/ERC4626.t.sol)
+- [MetaMorpho Vault Test](https://github.com/morpho-org/metamorpho/blob/826ef8d6506a69c26fab27508a5e0cc9235ccf25/test/forge/ERC4626ComplianceTest.sol)
+- [Snekmate ERC4626 Test](https://github.com/pcaversaccio/snekmate/blob/17d9fc00d5edf1c18051aa675306462a73c44b4f/test/extensions/ERC4626.t.sol)
+- [Yearn Tokenized Strategy Test](https://github.com/yearn/tokenized-strategy/blob/9ef68041bd034353d39941e487499d111c3d3901/src/test/ERC4626Std.t.sol)
+- [Aave Umbrella StakeToken Test](https://github.com/aave-dao/aave-umbrella/blob/46931815703662be836a66574aa7f5a4f8c55982/tests/stakeToken/ERC4626a16z.t.sol)
 
-[OpenZeppelin ERC4626]: <https://github.com/OpenZeppelin/openzeppelin-contracts/blob/a1948250ab8c441f6d327a65754cb20d2b1b4554/contracts/token/ERC20/extensions/ERC4626.sol>
-[Solmate ERC4626]: <https://github.com/transmissions11/solmate/blob/c2594bf4635ad773a8f4763e20b7e79582e41535/src/mixins/ERC4626.sol>
-[Revenue Distribution Token]: <https://github.com/maple-labs/revenue-distribution-token/blob/be9592fd72bfa7142a217507f2d5500a7856329e/contracts/RevenueDistributionToken.sol>
-[Yield Daddy ERC4626 wrappers]: <https://github.com/timeless-fi/yield-daddy>
-
-[^bug]: Our property tests indeed revealed an [issue](https://github.com/timeless-fi/yield-daddy/issues/7) in their eToken testing mock contract. The tests passed after it is [fixed](https://github.com/daejunpark/yield-daddy/commit/721cf4bd766805fd409455434aa5fd1a9b2df25c).
+More examples can be found in [other projects](https://github.com/search?q=path%3A*.sol+%22erc4626-tests%2FERC4626.test.sol%22+&type=code).
 
 ## Disclaimer
 
