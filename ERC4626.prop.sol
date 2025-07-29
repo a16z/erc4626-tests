@@ -47,6 +47,7 @@ abstract contract ERC4626Prop is Test {
 
     bool internal _vaultMayBeEmpty;
     bool internal _unlimitedAmount;
+    bool internal _skipRoundTripShares;
 
     //
     // asset
@@ -271,7 +272,7 @@ abstract contract ERC4626Prop is Test {
         if (!_vaultMayBeEmpty) vm.assume(IERC20(_vault_).totalSupply() > 0);
         vm.prank(caller); uint shares1 = vault_deposit(assets, caller);
         vm.prank(caller); uint shares2 = vault_withdraw(assets, caller, caller);
-        assertApproxGeAbs(shares2, shares1, _delta_);
+        if (!_skipRoundTripShares) assertApproxGeAbs(shares2, shares1, _delta_);
     }
 
     // deposit(redeem(s)) <= s
@@ -279,7 +280,7 @@ abstract contract ERC4626Prop is Test {
         vm.prank(caller); uint assets = vault_redeem(shares, caller, caller);
         if (!_vaultMayBeEmpty) vm.assume(IERC20(_vault_).totalSupply() > 0);
         vm.prank(caller); uint shares2 = vault_deposit(assets, caller);
-        assertApproxLeAbs(shares2, shares, _delta_);
+        if (!_skipRoundTripShares) assertApproxLeAbs(shares2, shares, _delta_);
     }
 
     // a = redeem(s)
@@ -297,7 +298,7 @@ abstract contract ERC4626Prop is Test {
         if (!_vaultMayBeEmpty) vm.assume(IERC20(_vault_).totalSupply() > 0);
         vm.prank(caller); uint assets = vault_mint(shares, caller);
         vm.prank(caller); uint shares2 = vault_withdraw(assets, caller, caller);
-        assertApproxGeAbs(shares2, shares, _delta_);
+        if (!_skipRoundTripShares) assertApproxGeAbs(shares2, shares, _delta_);
     }
 
     // a = mint(s)
@@ -325,7 +326,7 @@ abstract contract ERC4626Prop is Test {
         vm.prank(caller); uint shares1 = vault_withdraw(assets, caller, caller);
         if (!_vaultMayBeEmpty) vm.assume(IERC20(_vault_).totalSupply() > 0);
         vm.prank(caller); uint shares2 = vault_deposit(assets, caller);
-        assertApproxLeAbs(shares2, shares1, _delta_);
+        if (!_skipRoundTripShares) assertApproxLeAbs(shares2, shares1, _delta_);
     }
 
     //
