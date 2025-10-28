@@ -317,6 +317,28 @@ abstract contract ERC4626Test is ERC4626Prop {
     }
 
     //
+    // security tests
+    //
+
+    function test_withdraw_loss_socialization(Init memory init, uint assets) public virtual {
+        setUpVault(init);
+        address caller = init.user[0];
+        address other = init.user[1];
+        vm.assume(caller != other);
+        assets = bound(assets, 0, _max_withdraw(caller));
+        prop_withdraw_loss_socialization(caller, assets, other);
+    }
+
+    function test_redeem_loss_socialization(Init memory init, uint shares) public virtual {
+        setUpVault(init);
+        address caller = init.user[0];
+        address other = init.user[1];
+        vm.assume(caller != other);
+        shares = bound(shares, 0, _max_redeem(caller));
+        prop_redeem_loss_socialization(caller, shares, other);
+    }
+
+    //
     // utils
     //
 
